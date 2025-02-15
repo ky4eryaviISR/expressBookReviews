@@ -6,11 +6,11 @@ const regd_users = express.Router();
 let users = [];
 
 const isValid = (username)=>{ //returns boolean
-    return users.find(item=> item.user === username)
+    return users.find(item=> item.user === username);
 }
 
-const authenticatedUser = (username,password)=>{ //returns boolean
-//write code to check if username and password match the one we have in records.
+const authenticatedUser = (username, password)=>{ //returns boolean
+    return users.find(item=> item.user).pass == password;
 }
 
 //only registered users can login
@@ -25,14 +25,14 @@ regd_users.post("/login", (req,res) => {
   }
   let accessToken = jwt.sign({data: pass}, "secret", {expiresIn: 60*60});
   req.session.authorization = {accessToken, user};
-  return res.status(200).json({message: "Login success"})
+  return res.status(200).json({message: "Login success"});
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   let isbn = req.params.isbn;
-  let user =  req.session.authorization.user
-  let review = req.query.review
+  let user =  req.session.authorization.user;
+  let review = req.body.review;
   if(!review){
     return res.status(404).json("Review not provided");
   }
@@ -40,19 +40,19 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   if(!book){
     return res.status(404).json("Book not found");
   }
-  book.review[user] = review
+  book.reviews[user] = review;
   return res.status(200).json({message: "Review has been added"});
 });
 
 // Delete review
 regd_users.delete("/auth/review/:isbn", (req, res) => {
     let isbn = req.params.isbn;
-    let user =  req.session.authorization.user
+    let user =  req.session.authorization.user;
     let book = books[isbn];
     if(!book){
         return res.status(404).json("Book not found");
     }
-    book.review.delete(user)
+    delete book.reviews[user];
     return res.status(200).json({message: "Review has been deleted"});
 });
 
